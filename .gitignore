@@ -1,0 +1,7 @@
+bin/
+obj/
+temp_icon_bin/
+temp_icon_obj/
+.vs/
+*.user
+*.suo

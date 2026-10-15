@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" DynamicOmrFiller.csproj -p:Configuration=Debug -v:minimal)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" DynamicOmrFiller.csproj -t:Rebuild -p:Configuration=Debug -v:minimal)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" DynamicOmrFiller.csproj -t:Rebuild -p:Configuration=Release -v:minimal)"
+    ]
+  }
+}

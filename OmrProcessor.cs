@@ -32,6 +32,7 @@ namespace DynamicOmrFiller
         private int _dotSizePixels;
         private int _saqFontSizePixels;
         private int _saqLabelFontSizePixels;
+        private bool _writeSaqLabel = true;
         private StringAlignment _saqAlignHorizontal = StringAlignment.Center;
         private StringAlignment _saqAlignVertical = StringAlignment.Center;
         private OmrInputMode _inputMode;
@@ -69,6 +70,7 @@ namespace DynamicOmrFiller
             _dotSizePixels = options.DotSizePixels;
             _saqFontSizePixels = options.SaqFontSizePixels;
             _saqLabelFontSizePixels = options.SaqLabelFontSizePixels;
+            _writeSaqLabel = options.WriteSaqLabel;
             _saqAlignHorizontal = options.SaqAlignHorizontal;
             _saqAlignVertical = options.SaqAlignVertical;
             _fillQuestionQuality = options.FillQuestionQuality;
@@ -537,7 +539,8 @@ namespace DynamicOmrFiller
                     float totalWidth = region.ResultCountCellX * grid.StepX;
                     float totalHeight = region.ResultCountCellY * grid.StepY;
                     DrawSaqCell(g, extraText, region.MemberName, extraFont, labelFont, brush,
-                        extraFormat, labelFormat, startPixelX, startPixelY, totalWidth, totalHeight);
+                        extraFormat, labelFormat, startPixelX, startPixelY, totalWidth, totalHeight,
+                        _writeSaqLabel);
                 }
                 else
                 {
@@ -554,7 +557,8 @@ namespace DynamicOmrFiller
                         if (!string.IsNullOrEmpty(extraText))
                         {
                             DrawSaqCell(g, extraText, label, extraFont, labelFont, brush,
-                                extraFormat, labelFormat, startPixelX, cellTopY, availableWidth, cellHeight);
+                                extraFormat, labelFormat, startPixelX, cellTopY, availableWidth, cellHeight,
+                                _writeSaqLabel);
                         }
                         else
                         {
@@ -575,15 +579,22 @@ namespace DynamicOmrFiller
         private static void DrawSaqCell(Graphics g, string extraText, string label,
             Font extraFont, Font labelFont, Brush brush,
             StringFormat extraFormat, StringFormat labelFormat,
-            float x, float y, float width, float height)
+            float x, float y, float width, float height, bool writeLabel)
         {
             if (string.IsNullOrEmpty(extraText))
             {
-                g.DrawString(label, labelFont, brush, new RectangleF(x, y, width, height), labelFormat);
+                if (writeLabel)
+                {
+                    g.DrawString(label, labelFont, brush, new RectangleF(x, y, width, height), labelFormat);
+                }
                 return;
             }
 
-            float labelStrip = Math.Min(height * 0.4f, labelFont.GetHeight(g) * 1.5f);
+            // With the label turned off the text gets the whole cell rather
+            // than leaving an empty strip where the label used to sit.
+            float labelStrip = writeLabel
+                ? Math.Min(height * 0.4f, labelFont.GetHeight(g) * 1.5f)
+                : 0f;
             float insetX = Math.Min(12f, width * 0.01f);
             float insetY = Math.Min(10f, height * 0.06f);
 
@@ -594,8 +605,11 @@ namespace DynamicOmrFiller
                 Math.Max(1f, height - labelStrip - insetY));
             g.DrawString(extraText, extraFont, brush, textRect, extraFormat);
 
-            RectangleF labelRect = new RectangleF(x, y + height - labelStrip, width, labelStrip);
-            g.DrawString(label, labelFont, brush, labelRect, labelFormat);
+            if (writeLabel)
+            {
+                RectangleF labelRect = new RectangleF(x, y + height - labelStrip, width, labelStrip);
+                g.DrawString(label, labelFont, brush, labelRect, labelFormat);
+            }
         }
 
         /// <summary>

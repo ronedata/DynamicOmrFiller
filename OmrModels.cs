@@ -65,6 +65,12 @@ namespace DynamicOmrFiller
         public int DotSizePixels { get; set; }
         public int SaqFontSizePixels { get; set; }
 
+        /// <summary>
+        /// Write the auto-generated cell label ("SaqAnswer1") under the SAQ
+        /// text. Off leaves the whole cell to the text.
+        /// </summary>
+        public bool WriteSaqLabel { get; set; } = true;
+
         /// <summary>Font size for the auto-generated cell label ("SaqAnswer1"). 0 = auto from the grid.</summary>
         public int SaqLabelFontSizePixels { get; set; }
 

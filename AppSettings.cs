@@ -27,6 +27,7 @@ namespace DynamicOmrFiller
         public string SaqText { get; set; }
         public int SaqFontSizePixels { get; set; }
         public int SaqLabelFontSizePixels { get; set; }
+        public bool WriteSaqLabel { get; set; }
         public StringAlignment SaqAlignHorizontal { get; set; }
         public StringAlignment SaqAlignVertical { get; set; }
         public bool HasSaqDefaults { get; set; }
@@ -36,6 +37,7 @@ namespace DynamicOmrFiller
             SaqAlignHorizontal = StringAlignment.Center;
             SaqAlignVertical = StringAlignment.Center;
             WriteStudentNumbers = true;
+            WriteSaqLabel = true;
             WriteOffsetRows = 1.0f;
         }
 
@@ -78,6 +80,8 @@ namespace DynamicOmrFiller
                     settings.SaqText = NormalizeNewLines((string)saq.Element("text"));
                     settings.SaqFontSizePixels = ReadInt(saq.Element("fontSize"), 0);
                     settings.SaqLabelFontSizePixels = ReadInt(saq.Element("labelFontSize"), 0);
+                    // Missing in files written before 1.13.0 - default it on.
+                    settings.WriteSaqLabel = ReadBool(saq.Element("writeLabel"), true);
                     settings.SaqAlignHorizontal = ReadAlignment(saq.Element("alignHorizontal"), StringAlignment.Center);
                     settings.SaqAlignVertical = ReadAlignment(saq.Element("alignVertical"), StringAlignment.Center);
                     settings.HasSaqDefaults = true;
@@ -117,6 +121,7 @@ namespace DynamicOmrFiller
                     new XElement("text", SaqText ?? string.Empty),
                     new XElement("fontSize", SaqFontSizePixels),
                     new XElement("labelFontSize", SaqLabelFontSizePixels),
+                    new XElement("writeLabel", WriteSaqLabel),
                     new XElement("alignHorizontal", SaqAlignHorizontal),
                     new XElement("alignVertical", SaqAlignVertical)));
             }

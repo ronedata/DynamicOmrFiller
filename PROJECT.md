@@ -181,6 +181,11 @@ and the user's text is drawn in the space above it, aligned by
 `SaqAlignHorizontal` / `SaqAlignVertical`. Because the two never share a
 rectangle, "move the text to the bottom" cannot collide with the label.
 
+The label can be switched off with *Cell label* (`OmrBatchOptions.WriteSaqLabel`,
+default on). With it off the strip is not reserved at all, so the SAQ text gets
+the whole cell rather than leaving a gap where the label used to be, and
+*Label size (px)* greys out since it no longer means anything.
+
 | Setting | 0 / default | Otherwise |
 |---|---|---|
 | `SaqFontSizePixels` | `max(14, min(26, StepY * 0.6))` ≈ 22 px at 300 dpi | that pixel size |
@@ -341,10 +346,11 @@ below all start collapsed, so the form opens compact and nothing scrolls.
 3. **MCQ answer key** — a multiline box for the per-question MCQ answers, an
    *Other questions* `SegmentedToggle` (**Fill randomly** / **Leave blank**) and
    a live hint summarising what the key currently covers (see §7a).
-4. **SAQ content** — *Text size* and *Label size* (both 0–200 px, `0` = auto
-   from the grid), a *Text position* pair of `SegmentedToggle`s
-   (Left/Centre/Right and Top/Middle/Bottom), the multiline SAQ text box, and a
-   **Save as default** button (see §7b).
+4. **SAQ content** — *Text size*, a *Cell label* `ToggleSwitch` (**default on**)
+   with its *Label size* (both sizes 0–200 px, `0` = auto from the grid, the
+   size greyed out while the label is off), a *Text position* pair of
+   `SegmentedToggle`s (Left/Centre/Right and Top/Middle/Bottom), the multiline
+   SAQ text box, and a **Save as default** button (see §7b).
 5. **Settings** — dot size (1–200) + recommendation hint, and three
    `ToggleSwitch`es: *Fill Question Quality randomly* (**default on**),
    *Export the filled answers as an answer_key CSV* (default off) and
@@ -446,7 +452,7 @@ disposed one at a time (an A4 page at 300 dpi is ~26 MB as a bitmap).
 | Group | Saved | Restored by |
 |---|---|---|
 | `<student>` | Roll numbers, Registration numbers, *Write numbers*, *Write offset* | `SeedDefaults` |
-| `<saq>` | SAQ text, text size, label size, horizontal + vertical alignment | `SeedDefaults` |
+| `<saq>` | SAQ text, text size, *Cell label* on/off, label size, horizontal + vertical alignment | `SeedDefaults` |
 
 Each group carries a `Has…Defaults` flag (set when its element exists in the
 file), so an install that has never pressed Save still starts with the built-in
@@ -727,6 +733,7 @@ Tracked in `Properties/AssemblyInfo.cs` (`AssemblyVersion` + `AssemblyFileVersio
 | **1.11.1** | **Page-id marks are sized from `resultCountCellX/Y`.** They are not always a full grid cell, so the pitch between candidates is `(cell + spacing)` and the sample point is the cell's centre. On the Engineering 20+1 sheet the marks sit one row apart (`resultCountCellY=".5"`), but the old full-cell assumption sampled 1.5 rows apart and hit the gap between them: page 2 read as unidentifiable and failed. Page 2 now reads as page 2, keeps the same student's roll and gets its `SaqAnswer1` filled. The same bug was behind the blank Engineering template PDF yielding nothing. |
 | **1.11.2** | **PDF pages render at the size asked for.** Windows scales `DestinationWidth` by the monitor's DPI factor, so a 125% display produced 3100px pages instead of 2480px and the detected grid step changed with the monitor rather than the document. `PdfPageRenderer.RenderPage` now rescales to the exact width. |
 | **1.12.0** | **PDF output is cropped to the OMR sheet.** A PDF page is the whole A4 sheet, so a half-page design kept the question paper in the output. `CropToSheet` trims to the fiducial markers' bounding box (new `GridSystemData.SheetBounds`) plus two grid rows, landing within ~20 px of the hand-cropped sheets. Toggle in Settings, default on; image and folder modes are untouched. |
+| **1.13.0** | **The SAQ cell label can be turned off.** New *Cell label* toggle in the SAQ card (`OmrBatchOptions.WriteSaqLabel`, default on): off stops `SaqAnswer1` being printed and hands the whole cell to the SAQ text instead of reserving an empty strip for it. *Label size* greys out while it is off. Saved with the SAQ defaults; a settings file written before 1.13.0 reads back as on. |
 
 ### Workflow conventions for future changes
 - **Bump `AssemblyVersion`** in `Properties/AssemblyInfo.cs` on every change set (minor for features, patch for fixes/docs).

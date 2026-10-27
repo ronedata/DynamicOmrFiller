@@ -5,3 +5,8 @@ temp_icon_obj/
 .vs/
 *.user
 *.suo
+
+# Local test fixtures (real exam sheets from third-party sources) - not for
+# a public repo. Keep the sample layout documented in Test/README.md if you
+# want to recreate the folder locally.
+Test/

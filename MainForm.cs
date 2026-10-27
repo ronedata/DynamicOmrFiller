@@ -40,6 +40,8 @@ namespace DynamicOmrFiller
         private NumericUpDown _dotSize;
         private NumericUpDown _saqFontSize;
         private NumericUpDown _saqLabelFontSize;
+        private InputHost _saqLabelSizeHost;
+        private ToggleSwitch _writeSaqLabel;
         private SegmentedToggle _saqAlignH;
         private SegmentedToggle _saqAlignV;
         private readonly AppSettings _settings = AppSettings.Load();
@@ -573,13 +575,36 @@ namespace DynamicOmrFiller
             grid.Controls.Add(_saqFontHint, 2, row);
 
             row = AddRow(grid);
+            _writeSaqLabel = new ToggleSwitch
+            {
+                Text = "Write the auto-generated cell label (SaqAnswer1)",
+                Checked = true,
+                Anchor = AnchorStyles.Left,
+                Margin = new Padding(0, 6, 0, 2)
+            };
+            _toolTip.SetToolTip(_writeSaqLabel,
+                "The small label under the SAQ text, taken from the region's memberName."
+                + Environment.NewLine
+                + "Turn it off and the SAQ text gets the whole cell.");
+            grid.Controls.Add(MakeFieldLabel("Cell label"), 0, row);
+            grid.SetColumnSpan(_writeSaqLabel, 2);
+            grid.Controls.Add(_writeSaqLabel, 1, row);
+
+            row = AddRow(grid);
             _saqLabelFontSize = MakeNumeric(0, 200, 0);
             _saqLabelFontSize.ValueChanged += delegate { UpdateSaqFontHint(); };
+            _saqLabelSizeHost = MakeHost(_saqLabelFontSize);
             grid.Controls.Add(MakeFieldLabel("Label size (px)"), 0, row);
-            grid.Controls.Add(MakeHost(_saqLabelFontSize), 1, row);
+            grid.Controls.Add(_saqLabelSizeHost, 1, row);
             grid.Controls.Add(MakeHintLabel("Size of the auto-generated cell label (SaqAnswer1). 0 = auto."), 2, row);
             _toolTip.SetToolTip(_saqLabelFontSize,
                 "The small label printed under the SAQ text, taken from the region's memberName.");
+
+            // The size only means anything while the label is being written.
+            _writeSaqLabel.CheckedChanged += delegate
+            {
+                _saqLabelSizeHost.Enabled = _writeSaqLabel.Checked;
+            };
 
             row = AddRow(grid);
             FlowLayoutPanel alignRow = new FlowLayoutPanel
@@ -849,6 +874,8 @@ namespace DynamicOmrFiller
                 _saqText.Text = _settings.SaqText ?? string.Empty;
                 _saqFontSize.Value = ClampToRange(_settings.SaqFontSizePixels, _saqFontSize);
                 _saqLabelFontSize.Value = ClampToRange(_settings.SaqLabelFontSizePixels, _saqLabelFontSize);
+                _writeSaqLabel.Checked = _settings.WriteSaqLabel;
+                _saqLabelSizeHost.Enabled = _settings.WriteSaqLabel;
                 _saqAlignH.SelectedIndex = FromAlignment(_settings.SaqAlignHorizontal);
                 _saqAlignV.SelectedIndex = FromAlignment(_settings.SaqAlignVertical);
                 return;
@@ -893,6 +920,7 @@ namespace DynamicOmrFiller
             _settings.SaqText = _saqText.Text;
             _settings.SaqFontSizePixels = (int)_saqFontSize.Value;
             _settings.SaqLabelFontSizePixels = (int)_saqLabelFontSize.Value;
+            _settings.WriteSaqLabel = _writeSaqLabel.Checked;
             _settings.SaqAlignHorizontal = ToAlignment(_saqAlignH.SelectedIndex);
             _settings.SaqAlignVertical = ToAlignment(_saqAlignV.SelectedIndex);
             _settings.HasSaqDefaults = true;
@@ -1024,6 +1052,7 @@ namespace DynamicOmrFiller
                 DotSizePixels = (int)_dotSize.Value,
                 SaqFontSizePixels = (int)_saqFontSize.Value,
                 SaqLabelFontSizePixels = (int)_saqLabelFontSize.Value,
+                WriteSaqLabel = _writeSaqLabel.Checked,
                 SaqAlignHorizontal = ToAlignment(_saqAlignH.SelectedIndex),
                 SaqAlignVertical = ToAlignment(_saqAlignV.SelectedIndex),
                 FillQuestionQuality = _fillQuestionQuality.Checked,
